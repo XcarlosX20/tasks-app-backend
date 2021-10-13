@@ -12,7 +12,7 @@ exports.getTasks =async(req, res) => {
         res.status(401).json({"msg": "not authorized"});
     }
     //filter
-    const {project_id} = req.body;
+    const {project_id} = req.query;
     let task_of_project = await Tasks.find({project_id});
     if(!task_of_project) res.status(404).json({"msg": "task not found"})
     return res.json({task_of_project});
