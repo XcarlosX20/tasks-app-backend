@@ -2,20 +2,27 @@ const { validationResult } = require("express-validator");
 const Projects = require("../Model/Projects");
 const Tasks = require("../Model/Tasks");
 exports.getTasks =async(req, res) => {
-    const errors = validationResult(req);
-    if( !errors.isEmpty() ) {
-        return res.status(400).json({errores: errors.array() })
+    try {
+        // Extraer el proyecto y comprobar si existe
+        const { project_id } = req.query;
+        const existProject = await Projects.findById(project_id);
+        if(!existProject) {
+            return res.status(404).json({msg: 'Proyecto no encontrado'})
+        }
+
+        // Revisar si el proyecto actual pertenece al usuario autenticado
+        if(existProject.author.toString() !== req.user.id ) {
+            return res.status(401).json({msg: 'Not authorized'});
+        }
+
+        // Obtener las tareas por proyecto
+        const tasks = await Tasks.find({ project_id }).sort({ date: -1 });
+        res.json({ tasks });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send('There was a error');
     }
-    let project = await Projects.findById(req.body.project_id);
-    if(!project) res.status(404).json({"msg": "Project not found"});
-    if(project.author.toString() !== req.user.id){
-        res.status(401).json({"msg": "not authorized"});
-    }
-    //filter
-    const {project_id} = req.query;
-    let task_of_project = await Tasks.find({project_id});
-    if(!task_of_project) res.status(404).json({"msg": "task not found"})
-    return res.json({task_of_project});
 }
 exports.addTask = async(req, res) => {
     try {
