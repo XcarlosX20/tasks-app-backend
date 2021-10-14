@@ -21,7 +21,7 @@ exports.getTasks =async(req, res) => {
 
     } catch (error) {
         console.log(error);
-        res.status(500).send('There was a error');
+        res.status(500).send('There was an error');
     }
 }
 exports.addTask = async(req, res) => {
