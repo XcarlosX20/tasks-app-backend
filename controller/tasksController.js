@@ -46,10 +46,9 @@ exports.addTask = async(req, res) => {
 exports.updateTask = async(req, res) => {
     //change the state of task
     try {
-        const {task_name, state } = req.body;
         const task = {}
-        if(task_name) task.task_name = req.body.task_name;
-        if(state) task.state = req.body.state;
+        task.task_name = req.body.task_name;
+        task.state = req.body.state;
         //auth user
         let project = await Projects.findById(req.body.project_id);
         if(!project) res.status(404).json({"msg": "Project not found"});
@@ -68,23 +67,13 @@ exports.updateTask = async(req, res) => {
 exports.deleteTask = async(req, res) => {
     //change the state of task
    try {
-        const { project_id  } = req.query;
-
         let task = await Tasks.findById(req.params.id);
 
         if(!task) {
             return res.status(404).json({msg: 'task not found'});
-        }
-
-        const existProject = await Projects.findById(project_id);
-
-        // 
-        if(existProject.author.toString() !== req.user.id ) {
-            return res.status(401).json({msg: 'Not Auth'});
-        }
+        }        
         // delete
         await Tasks.findOneAndRemove({_id: req.params.id});
-        console.log(req.params.id);
         res.json({msg: 'Task deleted'})
     }
     catch (error) {
